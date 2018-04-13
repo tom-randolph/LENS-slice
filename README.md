@@ -8,7 +8,8 @@ __TODO:__ Provide numbers and detailed instructions
 2. Configure bed size.
 3. Configure layer height.
 4. Configure perimiters.
-5. Configure Preamble/Postamble
+5. Configure Preamble/Postamble.
+
  
 
 #### Using the Printer

@@ -13,11 +13,17 @@ import fileinput
 supported_types=[".gcode",".txt"]
 
 omit_line_rules=["G92", #extruder offset command
-					"M" #all M codes
+					"M1", #all M1** codes
+					#"G1 E" ,#extruder specific commands
+					"M82", 
 					]
 lines_changed=0;
 
-
+postamble="""M5 ;turn off laser
+M303 ; turn off powder 1
+M305 ;turn off powder 2
+G1 Z20 F5000 ;Raise print head
+G28 X Y ; home X Y axis"""
 					
 def check_omit_line(line):
 	'''Checks to see if line contains bad codes according to omit_line_rules,
@@ -53,14 +59,19 @@ if __name__=="__main__":
 				if check_omit_line(line):
 					lines_changed+=1
 					continue
-				print(line)
+				print(line,end='')
+		
 			
 	except:
 		#restore the original file from backup
 		os.remove(filename)
 		os.rename(filename+'.old',filename)
 		raise
+	#with open(filename,'a') as file:
+	#	file.write(postamble)
 	print("Finished")
 	print("Number of lines change:{}".format(lines_changed))
+	#print("Added Postamble:")
+	#print(postamble)
 	
 		
