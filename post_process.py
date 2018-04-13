@@ -1,7 +1,8 @@
 '''This will parse the original gcode file from slic3r and adapt parameters for use with LENS'''
 
 #TODO: Add arg parsing for settings like print parameters and parsing rules
-#TODO: add analytics (number of lines omitted, other changes)
+#TODO: Add analytics (number of lines omitted, other changes)
+#TODO: Add option to write to different file
 
 import sys
 import os
@@ -15,14 +16,17 @@ omit_line_rules=["G92", #extruder offset command
 					"M" #all M codes
 					]
 lines_changed=0;
+
+
 					
 def check_omit_line(line):
-	omit=False
+	'''Checks to see if line contains bad codes according to omit_line_rules,
+	will return true if line should be omitted'''
 	for code in omit_line_rules:
 		if code in line:
-			omit=True
-			break
-	return omit
+			return True
+			
+	else: return False
 
 if __name__=="__main__":
 
