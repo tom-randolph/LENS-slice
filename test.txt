@@ -1,0 +1,9 @@
+
+
+;some bad codes:
+
+
+
+G92
+M103
+
