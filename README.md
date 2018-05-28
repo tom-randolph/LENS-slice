@@ -1,6 +1,17 @@
 # LENS-slice
 ### A post-processing solution to adapt gcode for use with LENS printers
 
+#### What is LENS?
+LENS is an additive manufacturing process developed by [Optomec](https://www.optomec.com/3d-printed-metals/lens-printers/). The process rapidly and cheaply produces metal parts by jetting metal powder into a high-power laser beam, creating a weld bead on the part below. By comparison to more conventional powder-bed methods, LENS offers the advantage of high speed and low cost. Due to the use of powder jets, there is far less unused metal powder than in powder-bed processes, drastically reducing cost of operation. Also, without the need to interrupt metal sintering for heating periods on every layer, the print head can deposit material nearly non-stop, decreasing print time. In this regard, the machine behaves far more like a traditional FDM printer than any other process.
+
+So what's the tradeoff? For several reasons, the parts produced by this machine do not rival DMLS parts in quality. Firstly, jetting the powder onto the part is not a perfectly controlled process, and leads to continuous weld beads, opposed to homogenous layers. This is analogous to the disparity in quality between FDM parts and SLS parts, where the former process deposits continuous beads of molten plastic, and the latter process cure the entire layer nearly instantly. Secondly, the toolchain provided for running prints on the Optomec [LENS 450](https://www.optomec.com/3d-printed-metals/lens-printers/low-cost-metal-3d-printer/) is extremely limited. The machine is intended for research, not production. As such, it is run using the hobby-grade CNC control software [Mach4](http://www.machsupport.com/software/mach4/), and has very limited gcode generation software that does not allow for complex toolpaths and print geometry.
+
+Thus, I have created a script to adapt gcode files generated from FDM printer slicing software (I am using [Slic3r](http://slic3r.org/download)) to provide the correct toolpaths for the LENS printer. It is possible that the slicing software could be modified to provide the appropriate commands, but post-processing toolpaths for existing printers is a simpler approach to get the machine up and running. The current implementation is a Python 3 script that parses a gcode file outputted from Slic3r and edits it to have the appropriate gcodes to turn the laser on and off at the appropriate times as the X, Y, and Z stages move. 
+
+
+
+
+
 #### Configuring Slic3r
 __TODO:__ Provide numbers and detailed instructions
 
