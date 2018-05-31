@@ -13,37 +13,40 @@ import numpy as np
 
 supported_types=[".gcode",".txt"]
 
-laser = False
+laser = True
 
 
-def laser_on(line):
-	return 'M3'
+def laser_on(line=None):
+	return 'M3\n'
 
-def laser_off(line):
-	return 'M5'
+def laser_off(line=None):
+	return 'M5\n'
 
-def laser_toggle(line):
+def laser_toggle(line=None):
+	global laser
 	laser = not laser
 	if laser:
-		laser_on()
+		return laser_on()
 	else:
-		laser_off()
+		return laser_off()
 
 def confirm_laser(line):
+	global laser
 	if 'E' in line:
 		if not laser:
 			laser = True;
 			return 'M3\n' + line
+	else:
+		return line
 
 def omit(line):
 	return ';Line omitted in post-process\n'
 
-def adjust_feed(line, scale=3.5):
+def adjust_feed(line, scale=15.5):
 	out_line = line.split('F')
 
 	try:
 		out_line=out_line[0] + 'F' + str(np.around(float(out_line[-1])/scale,5)) + '\n'
-		print(out_line)
 	except ValueError:
 		return line
 	except:
@@ -53,12 +56,13 @@ def adjust_feed(line, scale=3.5):
 	
 	return out_line
 rules = {
-	'G1 X' : confirm_laser,
+	# 'G1 X' : confirm_laser,
+	'F' : adjust_feed,
 	'G1 E' : laser_toggle,
 	'G92' : laser_off,
 	'M1' : omit,
 	'M82' : omit,
-	'F' : adjust_feed,
+	
 }
 					
 
@@ -79,12 +83,13 @@ def parse_file(in_file,out_file):
 
 			# For each line in the input file, apply the appropriate changes and write them to the output file
 			for line in lines:
-				was_changed, line = check_rules(line)
-				
+
+				was_changed, out_line = check_rules(line)
+
 				# Track the number of changes made
 				if was_changed :
 					lines_changed += 1
-				o_f.write(line)
+				o_f.write(out_line)
 
 	# Return the lines changed to an output statistic
 	return lines_changed
@@ -95,11 +100,11 @@ def check_rules(in_line):
 	was_changed = False
 	out_line = in_line
 	for rule in rules:
-		# print(rule)
 		if rule in in_line:
 			was_changed = True
 			out_line = rules[rule](in_line)
-	# print(out_line)
+			print('Checked rule')
+			print(out_line)
 	return was_changed, out_line
 	
 
