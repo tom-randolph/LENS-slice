@@ -7,50 +7,66 @@
 import sys
 import os
 import argparse
+import numpy as np
 
 
 
 supported_types=[".gcode",".txt"]
 
-omit_line_rules=["G92", #extruder offset command
-					"M1", #all M1** codes
-					#"G1 E" ,#extruder specific commands
-					"M82", 
-					]
+laser = False
 
+
+def laser_on(line):
+	return 'M3'
+
+def laser_off(line):
+	return 'M5'
+
+def laser_toggle(line):
+	laser = not laser
+	if laser:
+		laser_on()
+	else:
+		laser_off()
+
+def confirm_laser(line):
+	if 'E' in line:
+		if not laser:
+			laser = True;
+			return 'M3\n' + line
 
 def omit(line):
 	return ';Line omitted in post-process\n'
+
+def adjust_feed(line, scale=3.5):
+	out_line = line.split('F')
+
+	try:
+		out_line=out_line[0] + 'F' + str(np.around(float(out_line[-1])/scale,5)) + '\n'
+		print(out_line)
+	except ValueError:
+		return line
+	except:
+		raise
+		print('Error adjusting feed rate')
+		return line
+	
+	return out_line
 rules = {
-	'G92' : omit,
+	'G1 X' : confirm_laser,
+	'G1 E' : laser_toggle,
+	'G92' : laser_off,
 	'M1' : omit,
 	'M82' : omit,
+	'F' : adjust_feed,
 }
 					
-def check_omit_line(line):
-	'''Checks to see if line contains bad codes according to omit_line_rules,
-	will return true if line should be omitted'''
-	for code in omit_line_rules:
-		if code in line:
-			return True
-			
-	else: return False
 
 def parse_file(in_file,out_file):
 	'''Parse an input file line-by-line and change codes in file according to specified rule modifiers'''
 
-	if os.path.isfile(out_file):
-		print('File already exists...')
-
-		ans = input('Would you like to overwrite it? (y/n)')
-		if ans in ['y','Y','Yes','yes']:
-			pass
-		else: 
-			print('No edits will be made. Specify output filename if desired.')
-			return None
-
 	# A counter for the nubmer of lines changed in the script
-	lines_changed=0;
+	lines_changed=0
 
 	# Open the input file
 	with open(in_file) as i_f:
@@ -101,13 +117,24 @@ if __name__=="__main__":
 		print("Unrecognized filetype")
 		print("Please use the following types:")
 		print(*supported_types, sep=',')
-		sys.exit()
+		sys.exit(1)
 
 	output_file=args.output_file
 
 	if output_file is None:
 		output_file = input_file.split('.')
 		output_file = output_file[0]+'-LENS.'+output_file[1]
+	
+	if os.path.isfile(output_file):
+		print('File already exists...')
+
+		ans = input('Would you like to overwrite it? (y/n)')
+		if ans in r'^[Yy]$|^Yes$|^yes|':
+			pass
+		else: 
+			print('No edits will be made. Specify output filename if desired.')
+
+			sys.exit(1)
 		
 	print("Processing {}....".format(input_file))
 
