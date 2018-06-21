@@ -44,8 +44,6 @@ def get_test_id(json_dir):
 
 def add_gcode_column(file, pos,power = None,feed = None, powder = None):
     dwell = 8000
-    factor = .182
-    # dwell=np.around(dwell/factor,5)
     with open(file, 'a') as f:
         if powder is not None:
             # f.write('M302 P' + str(powder) + '\n')
